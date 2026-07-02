@@ -1,87 +1,104 @@
 # Linear Time Invariant Systems
 
-A linear time invariant system is a specific class of systems that combines the property of linearity (*Principle of superposition*) and time-invariant. In particular, a linear time invariant system can be entirely charcterized by its impulse response.
+A linear time invariant (LTI) system is a system that satisfies both linearity (the *principle of superposition*) and time-invariance. An LTI system is entirely characterized by a single function: its impulse response.
 
-Infact if we consider an input impulse $\delta[n-k]$ occuring at $n=k$ and $h_k[n]$ the response of the system, we can write
+# Sequence as a Linear Combination of Impulses
 
-*Sequence as a linear combination of impulses responses*
-$$
-y[n]=T\{\sum_{k=-\infty}^{+\infty} x[k]\delta[n-k]\} 
-$$
+Any input sequence can be written as a weighted sum of shifted unit impulses:
 
-*Linearity*
-$$
-y[n]=\sum_{k=-\infty}^{+\infty} x[k]T\{\delta[n-k]\}=\sum_{k=-\infty}^{+\infty} x[k]h_k[n]
-$$
+```math
+x[n]=\sum_{k=-\infty}^{+\infty} x[k]\delta[n-k]
+```
 
-In a purely linear system, the response of the system $h_k[n]$ depends both from $k$ and $n$ and this is not very practical. **The impulse response in this case change for every step k**. This requires to memorize infinite impulse response for each instant of time when the impulse is applied.
-Applying the constraint of time-invariance, we force the system to act in the same way independently when it's stimolated.
+Let $h_k[n]$ be the response of the system to an impulse $\delta[n-k]$ applied at $n=k$. Applying the system operator $T$ to the sequence above gives:
 
-*Time-invariance*
+```math
+y[n]=T\{\sum_{k=-\infty}^{+\infty} x[k]\delta[n-k]\}
+```
 
-$$
-    if \quad h[n]=T\{\delta[n]\}\quad then \quad \delta[n-k]=h[n-k]
-$$
+By linearity, $T$ can be moved inside the summation:
 
-So with this constraint we are saying that that system response to an impulse delayed of $k$ is equal to a delayed $h$ of $k$ samples. So we can write
+```math
+y[n]=\sum_{k=-\infty}^{+\infty} x[k]\,T\{\delta[n-k]\}=\sum_{k=-\infty}^{+\infty} x[k]\,h_k[n]
+```
 
-$$
-y[n]=\sum_{k=-\infty}^{+\infty} x[k]h[n-k]
-$$
+In a purely linear (but not time-invariant) system, $h_k[n]$ depends on both $k$ and $n$, which is impractical: the impulse response changes for every instant $k$ at which the impulse is applied, so infinitely many responses would need to be stored.
 
-In conlusion: **A linear time invariant system (LTI) is completly characterized by its impulse response $h[n]$**. This expression is also known as the convolution sum, and it can be represented with this notation:
+# Time-Invariance and the Convolution Sum
 
-$$
+Imposing time-invariance forces the system to react identically to a stimulus regardless of when it is applied:
+
+```math
+\text{if } h[n]=T\{\delta[n]\} \quad \text{then} \quad T\{\delta[n-k]\}=h[n-k]
+```
+
+This states that the response to an impulse delayed by $k$ samples is simply $h[n]$ delayed by $k$ samples. Substituting this into the expression for $y[n]$ gives the **convolution sum**:
+
+```math
+y[n]=\sum_{k=-\infty}^{+\infty} x[k]\,h[n-k]
+```
+
+**A linear time invariant system is completely characterized by its impulse response $h[n]$.** The convolution sum is denoted by:
+
+```math
 y[n]=x[n]*h[n]
-$$
+```
 
-## Computation of convolution sum
+# Computation of the Convolution Sum
 
-In order to compute the convolution for each sample $n$ we need to compute $h[n-k]$ and then multiply it with $x[k]$.
-For this reasn is useful to see the following relationshio:
-$$
+Computing $y[n]$ requires evaluating $h[n-k]$ and multiplying it by $x[k]$ at every $n$. This is easier when $h[n-k]$ is seen as a reflected and shifted version of $h[k]$:
+
+```math
 h[n-k]=h[-(k-n)]
-$$
+```
 
-This expression tell us thath $h[n-k]$ can be seen as reflected and traslated version of $h[k]$. The algorithm to correctly compute this convolution is:
+## Algorithm
 
-1) Consider the impulse response $h[n]=h[k]$
-2) Reflecting $h[k]$ about origin in order to obtain $h[-k]$
-3) Now to compute the output of the sample $n$, you have to shift the origin of $h[-k]$ of $n$ samples $h[-(k-n)]$, and then you can multiply sample by sample $x[k]h[n-k]$
-4) Repeat 3 for each $n$ samples
+1. Consider the impulse response $h[n]=h[k]$.
+2. Reflect $h[k]$ about the origin to obtain $h[-k]$.
+3. Shift the origin of $h[-k]$ by $n$ samples to obtain $h[n-k]$, then multiply sample by sample with $x[k]$.
+4. Sum the products and repeat step 3 for every $n$.
 
-## Properties of linear time invariant systems
+# Properties of Linear Time Invariant Systems
 
-1) The convolution operation is commutative:
-   $$
-   x[n]*h[n]=h[n]*x[n]
-   $$
+## Commutativity
 
-2) Distribution over addition:
-   $$
-   x[n]*(h_1[n]+h_2[n])=x[n]*h_1[n]+x[n]*h_2[n]
-   $$
+```math
+x[n]*h[n]=h[n]*x[n]
+```
 
-3) Property of a cascade of LTI:
-   
-   $$
-   x[n]\rightarrow[h_1[n]]\rightarrow y_1[n]\rightarrow[h_2[n]]\rightarrow y[n]  
-   $$
+## Distributivity over Addition
 
-   This is equal to consider
+```math
+x[n]*(h_1[n]+h_2[n])=x[n]*h_1[n]+x[n]*h_2[n]
+```
 
-   $$
-   x[n]\rightarrow[h_1[n]*h_2[n]]\rightarrow y[n]
-   $$
+## Cascade of LTI Systems
 
-   So the overall system is $h[n] = h_1[n]*h_2[n]$
+```math
+x[n]\rightarrow[h_1[n]]\rightarrow y_1[n]\rightarrow[h_2[n]]\rightarrow y[n]
+```
 
-4) Stability:    
-   LTI systems are stable if and only if the impulse response is absolutly summable:
+is equivalent to:
 
-   $$
-    S=\sum_{k=-\infty}^{+\infty}|h[k]|<\infty
-   $$
+```math
+x[n]\rightarrow[h_1[n]*h_2[n]]\rightarrow y[n]
+```
 
-5) Causality for LTI: 
-   A LTI is causal if and only if $h[n]=0$ for $n<0$
+The overall impulse response of the cascade is therefore $h[n]=h_1[n]*h_2[n]$.
+
+## Stability
+
+An LTI system is stable if and only if its impulse response is absolutely summable:
+
+```math
+S=\sum_{k=-\infty}^{+\infty}|h[k]|<\infty
+```
+
+## Causality
+
+An LTI system is causal if and only if:
+
+```math
+h[n]=0 \quad \text{for } n<0
+```
